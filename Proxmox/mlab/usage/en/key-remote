@@ -1,0 +1,11 @@
+Usage:  mlab key-remote [KEY_FILENAME] [SSH_SERVER] [KEY_PASSWORN optional] 
+
+Create ssh-key and send to remote server
+
+Example: 
+        
+        mlab key-remote minha-chave delta@192.168.1.1 
+
+        mlab key-remote minha-chave delta@192.168.1.1 senha_secreta
+
+For more details, see man mlab.

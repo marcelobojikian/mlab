@@ -94,40 +94,22 @@ key_remote() {
 
 }
 
-_usage_key_remote() {
-cat <<EOF
-
-Usage:  mlab key-remote [KEY_FILENAME] [SSH_SERVER] [KEY_PASSWORN optional] 
-
-Create ssh-key and send to remote server
-
-Example: 
-        
-        mlab key-remote minha-chave delta@192.168.1.1 
-
-        mlab key-remote minha-chave delta@192.168.1.1 senha_secreta
-
-For more details, see man mlab.
-
-EOF
-}
-
 _usage() {
-cat <<EOF
+    
+    local KEY="${1:-mlab}"
+    local LANG=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
 
-Usage:  mlab [OPTIONS] COMMAND
+    local URL=https://raw.githubusercontent.com/marcelobojikian/mlab/main/Proxmox/mlab/usage/$LANG/$KEY
 
-Common Commands:
-  key-remote           Create ssh-key and send to remote server
-  first-step           Install VSCode using docker and aneble ansible to use
-
-Global Options:
-  -h                   Show this message
-  -v                   Print version information and quit
-
-Run 'mlab COMMAND -h' for more information on a command.
-For more details, see man mlab.
-EOF
+    local OUTPUT_FILE=$(mktemp)
+    local HTTP_CODE=$(curl --silent --output $OUTPUT_FILE --write-out "%{http_code}" $URL)
+    
+    if [ ${HTTP_CODE} -eq 404 ] ; then 
+        echo "usage not exist" && exit 1
+    else
+        cat "$OUTPUT_FILE"
+    fi
+    
 }
 
 OPTSTRING=":hv"
@@ -136,7 +118,7 @@ case $1 in
   key-remote)
     case $2 in
         '-h')
-            _usage_key_remote 
+            _usage key-remote 
         ;;
         *)
             [ -z "$2" ] && echo "Invalid option: KEY_FILENAME." && echo "Try 'mlab key-remote -h' for more information." && exit 1
@@ -155,7 +137,7 @@ case $1 in
     while getopts ${OPTSTRING} opt; do
     case ${opt} in
         h)
-            _usage
+            _usage mlab
         ;;
         v)
             echo "Version: 1.0"
