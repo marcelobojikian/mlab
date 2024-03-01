@@ -1,0 +1,13 @@
+
+Usage:  mlab [OPTIONS] COMMAND
+
+Common Commands:
+  key-remote           Create ssh-key and send to remote server
+  first-step           Install VSCode using docker and aneble ansible to use
+
+Global Options:
+  -h                   Show this message
+  -v                   Print version information and quit
+
+Run 'mlab COMMAND -h' for more information on a command.
+For more details, see man mlab.
