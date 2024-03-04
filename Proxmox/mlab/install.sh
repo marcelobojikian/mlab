@@ -2,6 +2,9 @@
 
 echo Instalando Home Lab lib
 
-sudo wget https://raw.githubusercontent.com/marcelobojikian/mlab/main/Proxmox/mlab/cmd.sh -O /usr/local/sbin/mlab && sudo chmod +x /usr/local/sbin/mlab
+URI=https://raw.githubusercontent.com/marcelobojikian/mlab/main/Proxmox/mlab
+TO=/usr/local/sbin/mlab
+
+sudo wget "$URI/cmd.sh" -O "$TO" && sudo chmod +x "$TO"
 
 echo Instalacao completa

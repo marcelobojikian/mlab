@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+cat <<"EOF"
 
 Usage:  mlab [OPTIONS] COMMAND
 
@@ -11,3 +13,5 @@ Global Options:
 
 Run 'mlab COMMAND -h' for more information on a command.
 For more details, see man mlab.
+
+EOF
