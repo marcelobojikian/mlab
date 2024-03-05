@@ -1,24 +1,19 @@
 #!/usr/bin/env bash
 
+export LOG_LEVEL=ERROR
+
 URI=https://raw.githubusercontent.com/marcelobojikian/mlab/main/Proxmox/mlab
 source <(curl -s $URI/env/global.func.sh)
 
 CACHED=false
 CACHE_DIR=~/.mlab/cache
-LOG_LEVEL="ERROR"
 
-cmd_vm=("key-remote" "first-step")
+cmd_vm=("neovim" "key-remote" "first-step")
 cmd_dev=("hi-world")
 ALL_CMD=(${cmd_vm[@]} ${cmd_dev[@]})
 FIRST_CMD="$1"
 
 LANG=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
-
-log() {
-  local severity=$1
-  shift;
-  _logger $LOG_LEVEL $severity $@
-}
 
 has_argument() {
    [[ ("$1" == *=* && -n ${1#*=}) || ( ! -z "$2" && "$2" != -*) ]];
@@ -202,7 +197,20 @@ _command() {
     CMD="$CMD/$FIRST_CMD.sh"
 
   fi
-  PARAMETER="$@"
+
+  # sanitize
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --cached)
+        ;;
+      --cache-dir | -l | --log-level)
+        shift
+        ;;
+      *)
+        PARAMETER+="$1 "
+    esac
+    shift
+  done
 
 }
 
@@ -212,4 +220,3 @@ _mlab_options $@
 _command $@
 
 _run "$CMD" "$PARAMETER"
-

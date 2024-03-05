@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+cat <<"EOF"
+
+Usage:  mlab neovim [OPTIONS]
+
+Commands:
+  install                  Install NeoVim
+  uninstall                Uninstall NeoVim
+
+Options:
+  -h, --help               Show this message
+
+Run 'mlab neovim -h' for more information on a command.
+For more details, see man mlab.

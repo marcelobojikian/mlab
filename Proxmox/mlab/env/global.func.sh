@@ -1,22 +1,19 @@
 
-_logger() {
-
-  local lvl_configured=$(echo "${1:-"ERROR"}" | awk '{print toupper($0)}')
-  local -A levels=( ['DEBUG']="7" ['INFO']="6" ['WARN']="4" ['ERROR']="3" ['FATAL']="2")
+log() {
   
-  local type=$(echo "${2}" | awk '{print toupper($0)}')
-  [[ ! ${!levels[@]} =~ $type ]] && echo "Invalid log" && exit 1
+  local severity=$(echo "${1}" | awk '{print toupper($0)}')
+  shift
 
-  shift 2
+  local -A levels=( ['DEBUG']="7" ['INFO']="6" ['WARN']="4" ['ERROR']="3" ['FATAL']="2")
+  [[ ! ${!levels[@]} =~ $severity ]] && echo "Invalid log" && exit 1
 
-  local lvl_visible="${levels[${lvl_configured}]}"
+  local LEVEL=$(echo "${LOG_LEVEL:-"ERROR"}" | awk '{print toupper($0)}')
+  local LOG="${levels[${LEVEL}]}"
 
-  local lvl_used="${levels[${type}]:-3}"
-  local message="[${type}] ${@}";
+  local lvl_msg="${levels[${severity}]:-3}"
+  local msg="[${severity}] ${@}";
 
-  if [ $lvl_visible -ge $lvl_used ] ;then
-    echo -e $message
-  fi
+  [ $LOG -ge $lvl_msg ] && echo -e $msg
 
 }
 
