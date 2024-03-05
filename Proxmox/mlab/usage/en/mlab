@@ -4,10 +4,10 @@ cat <<"EOF"
 Usage:  mlab [OPTIONS] COMMAND
 
 Commands:
+  neovim                   Manage NeoVim from (https://neovim.io) 
   key-remote               Create ssh-key and send to remote server
   first-step               Install VSCode using docker and enable to use ansible
   rm-cache                 Remove local cache 
-  git                      Manage git [TO DO]
 
 Options:
   -h, --help               Show this message
