@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 URI=https://raw.githubusercontent.com/marcelobojikian/mlab/main/Proxmox/mlab
+source <(curl -s $URI/env/global.func.sh)
 
 CACHED=false
 CACHE_DIR=~/.mlab/cache
 DEBUG=false
-LOG_LEVEL="INFO"
+LOG_LEVEL="ERROR"
 
 cmd_vm=("key-remote" "first-step")
 cmd_dev=("hi-world")
@@ -13,6 +14,12 @@ ALL_CMD=(${cmd_vm[@]} ${cmd_dev[@]})
 FIRST_CMD="$1"
 
 LANG=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
+
+log() {
+  local severity=$1
+  shift;
+  _logger $LOG_LEVEL $severity $@
+}
 
 has_argument() {
    [[ ("$1" == *=* && -n ${1#*=}) || ( ! -z "$2" && "$2" != -*) ]];
@@ -27,14 +34,16 @@ _global_options() {
     case $1 in
       --cached)
         CACHED=true
+        log debug "Cache mode enabled."
         ;;
       --cache-dir)
         if ! has_argument $@; then
-          echo "Path not specified." >&2
+          echo "Cache path not specified." >&2
           echo "Try 'mlab -h' for more information."
           exit 1
         fi
         CACHE_DIR=$(extract_argument $@)
+        log debug "Cache path specified: $CACHE_DIR"
         shift
         ;;
       -l | --log-level)
@@ -44,11 +53,11 @@ _global_options() {
           exit 1
         fi
         LOG_LEVEL=$(extract_argument $@)
-        echo "-l | --log-level"
+        log debug "Log level specified: $LOG_LEVEL"
         ;;
       -D | --debug)
         DEBUG=true
-        echo "-D | --debug"
+        log debug "Debug mode enabled."
         ;;
     esac
     shift
@@ -77,7 +86,7 @@ _mlab_options() {
         ;;
       rm-cache)
         rm -R $CACHE_DIR
-        echo "Cache removed"
+        log info "Cache removed"
         exit 0
         ;;
     esac
@@ -129,17 +138,18 @@ _run() {
   local URL="$URI/$KEY"
   local CODE=0
 
+  log debug "Run command $KEY"
+
   # Download
   local SOURCE="$CACHE_DIR/$KEY"    
   if [ "$CACHED" = false ]; then
-    echo "[DEBUG] - no cache"
+    log debug "No cache"
     SOURCE=$(mktemp)
     _download "$URL" "$SOURCE"
     CODE=$?
   else
-    echo "[DEBUG] - cached"
     if [ ! -f "$SOURCE" ]; then
-      echo "[DEBUG] - $KEY not cached yet"
+      log debug "Not cached yet"
       SOURCE=$(mktemp)
       _download "$URL" "$SOURCE"
       CODE=$?
@@ -149,23 +159,26 @@ _run() {
   # Check download  
   if [ ${CODE} -eq 0 ] ; then
     if [ "$CACHED" = false ]; then
-      echo "[DEBUG] - $KEY downloaded"
+      log debug "downloaded"
       chmod +x "$SOURCE"
     else
       if [ ! -f "$CACHE_DIR/$KEY" ]; then
-        echo "[DEBUG] - Caching $KEY on "$CACHE_DIR/$KEY""
+        log debug "Caching on "$CACHE_DIR/$KEY""
         _cache "$SOURCE" "$CACHE_DIR/$KEY"
         chmod +x "$CACHE_DIR/$KEY"
         SOURCE="$CACHE_DIR/$KEY"
       fi
     fi
+    log debug "Running cmd $SOURCE $PARAMS"
     $SOURCE $PARAMS
   elif [ ${CODE} -eq 1 ] ; then
-    echo "[DEBUG] - File not found: $URL"
-    echo "[ERROR] - Create on folder \"mlab\" file : $KEY" && exit 1
+    echo "File not found: $URL"
+    echo "Create on folder \"mlab\" file : $KEY" && exit 1
   else
-    echo "[DEBUG] - $KEY downloaded fail, error"
-    echo "[ERROR] - File error: $(cat $SOURCE)" && exit 1
+    log fatal "Downloaded fail from $URL"
+    log fatal "File error: $(cat $SOURCE)"
+    echo "Downloaded fail: $URL" && exit 1
+    
   fi
 
 }
@@ -173,11 +186,6 @@ _run() {
 _help() {
     local KEY="usage/$LANG/${1:-mlab}"
     _run $KEY
-}
-
-_dev() {
-    local KEY="dev/${1:-"hello-world"}.sh"
-    echo _run $KEY
 }
 
 CMD=""
@@ -188,14 +196,14 @@ _command() {
 
   if [[ ! ${ALL_CMD[@]} =~ $FIRST_CMD ]] ;then
     CMD="mlab"
-    echo "value not found"
+    log debug "$value is not mapped"
   else
     shift
 
     [[ ${cmd_vm[@]} =~ $value ]] && CMD="cmd/vm"
     [[ ${cmd_dev[@]} =~ $value ]] && CMD="cmd/dev"
     
-    echo "value $CMD found"
+    log debug "value $CMD mapped"
     CMD="$CMD/$FIRST_CMD.sh"
 
   fi
@@ -209,10 +217,4 @@ _mlab_options $@
 _command $@
 
 _run "$CMD" "$PARAMETER"
-
-#_cmd vm $FILE $@
-if [ "$CACHED" = true ]; then
- echo "Cache mode enabled."
- echo "Cache dir specified: $CACHE"
-fi
 
