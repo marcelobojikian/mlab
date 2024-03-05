@@ -6,6 +6,7 @@ Usage:  mlab [OPTIONS] COMMAND
 Commands:
   key-remote               Create ssh-key and send to remote server
   first-step               Install VSCode using docker and enable to use ansible
+  rm-cache                 Remove local cache 
   git                      Manage git [TO DO]
 
 Options:
@@ -13,7 +14,6 @@ Options:
   -v, --version            Print version information and quit
       --cached             Enable cache on folder $HOME/.mlab/cache
       --cache-dir          Path to send the cache
-  -D, --debug              Enable debug mode
   -l, --log-level string   Set the logging level ("debug"|"info"|"warn"|"error"|"fatal") (default "info")
 
 Run 'mlab COMMAND -h' for more information on a command.

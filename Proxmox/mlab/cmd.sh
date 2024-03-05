@@ -5,7 +5,6 @@ source <(curl -s $URI/env/global.func.sh)
 
 CACHED=false
 CACHE_DIR=~/.mlab/cache
-DEBUG=false
 LOG_LEVEL="ERROR"
 
 cmd_vm=("key-remote" "first-step")
@@ -54,10 +53,6 @@ _global_options() {
         fi
         LOG_LEVEL=$(extract_argument $@)
         log debug "Log level specified: $LOG_LEVEL"
-        ;;
-      -D | --debug)
-        DEBUG=true
-        log debug "Debug mode enabled."
         ;;
     esac
     shift
