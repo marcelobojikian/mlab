@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+cat <<"EOF"
+Usage: mlab cache [OPTIONS] COMMAND
+
+Commands:
+  enable               Enable local cache
+  delete               Remove local cache
+  get <string>         Retrive file cached
+  put <key> <filename> Retrive file cached
+
+Options:
+  -h, --help           Show this message
+      --url=<string>   Where cache need to download file
+      --path=<string>  Path to send the cache ( $HOME/.mlab/cache )
+
+Run 'mlab cache -h' for more information on a command.
+For more details, see man mlab.
+EOF
