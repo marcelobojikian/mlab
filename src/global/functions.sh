@@ -56,7 +56,7 @@ cmd_cache() {
 
   if [ ! -f $path_caching ] ; then
 
-    local KEY_CACHE="${targets[cache]}/cache.sh"
+    local KEY_CACHE="$(command_key cache)"
     
     mkdir -p $(dirname "$path_caching")
     download "$key_caching" "$path_caching"
