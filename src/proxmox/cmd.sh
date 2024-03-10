@@ -6,6 +6,7 @@ DEFAULT_CACHE_CONF=~/.mlab/cache/conf.txt
 declare -A targets
 
 targets[cache]=global
+targets[first-installer]=proxmox
 
 get_config() {
     echo $(cat "$1" | grep "$2" | cut -d'=' -f2)

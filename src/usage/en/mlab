@@ -4,6 +4,7 @@ Usage: mlab [OPTIONS] COMMAND
 
 Commands:
   cache                    Manage cache files
+  first-installer          Standard installer for vitual machines in Proxmox
 
 Options:
   -h, --help               Show this message
