@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+cat <<"EOF"
+Usage: mlab first-installer [OPTIONS] COMMAND
+*root privileges are necessary
+
+Commands:
+  qemu                 Install QEmu
+  docker               Install Docker
+  vscode               Install VSCode with Ansible
+  info                 Show information about programs
+
+Options:
+  -h, --help           Show this message
+
+Run 'mlab first-installer -h' for more information on a command.
+For more details, see man mlab.
+EOF
