@@ -2,7 +2,7 @@
 
 setup() {
     load "$PROJECT_ROOT/test/test_helper/bats_setup"
-    _path_setup proxmox
+    _common_setup
 }
 
 teardown() {
@@ -20,41 +20,41 @@ debug() {
 }
 
 show_usage() {
-    run $@    
+    run mlab.sh $@    
     [[ "${status}" -eq 0 ]]
     [[ "${lines[0]}" == "Usage: mlab [OPTIONS] COMMAND"* ]]
 }
 
 show_version() {
-    run $@ 
+    run mlab.sh $@ 
     [[ "${status}" -eq 0 ]]
     [[ "${lines[0]}" == "Version: "* ]]
 }
 
 invalid_option() {
-    run $@
+    run mlab.sh $@
     [[ "${status}" -eq 1 ]]
     [[ "${lines[0]}" == "Invalid option: "* ]]
     [[ "${lines[1]}" == "Try 'mlab -h' for more information." ]]
 }
 
 @test "Check invalid option" {
-    invalid_option cmd.sh -E
-    invalid_option cmd.sh -Ehv
-    invalid_option cmd.sh -X
-    invalid_option cmd.sh --XXXXXX
+    invalid_option -E
+    invalid_option -Ehv
+    invalid_option -X
+    invalid_option --XXXXXX
 }
 
 @test "Check help option" {
-    show_usage cmd.sh
-    show_usage cmd.sh -h
-    show_usage cmd.sh --help
-    show_usage cmd.sh -hl
-    show_usage cmd.sh -hl info
+    show_usage 
+    show_usage -h
+    show_usage --help
+    show_usage -hl
+    show_usage -hl info
 }
 
 @test "Check version option" {
-    show_version cmd.sh -v
-    show_version cmd.sh --version
-    show_version cmd.sh -vl
+    show_version -v
+    show_version --version
+    show_version -vl
 }
