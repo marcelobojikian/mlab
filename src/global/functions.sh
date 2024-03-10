@@ -1,6 +1,29 @@
 
-get_config() {
-    echo $(cat "$1" | grep "$2" | cut -d'=' -f2)
+command_key(){
+
+  targets=()
+  targets[cache]=global
+  targets[first-installer]=proxmox
+
+  echo "${targets[$1]}/$1.sh"
+}
+
+log() {
+  
+  local severity=$(echo "${1}" | awk '{print toupper($0)}')
+  shift
+
+  local -A levels=( ['DEBUG']="7" ['INFO']="6" ['WARN']="4" ['ERROR']="3" ['FATAL']="2")
+  [[ ! ${!levels[@]} =~ $severity ]] && echo "Invalid log" && exit 1
+
+  local LEVEL=$(echo "${LOG_LEVEL:-"ERROR"}" | awk '{print toupper($0)}')
+  local LOG="${levels[${LEVEL}]}"
+
+  local lvl_msg="${levels[${severity}]:-3}"
+  local msg="[${severity}] ${@}";
+
+  [ $LOG -ge $lvl_msg ] && echo -e $msg
+
 }
 
 download() {
