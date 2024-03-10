@@ -17,6 +17,7 @@ mkdir -p "$COMMAND_PATH_CONF"
 echo Set default configuration on path $COMMAND_PATH_CONF/conf.txt
 cat <<EOF > $COMMAND_PATH_CONF/conf.txt
 URI=$PROJECT_ROOT/src
+FUNCTIONS=$COMMAND_PATH_CONF/global/functions.sh
 LOG_LEVEL=ERROR
 EOF
 

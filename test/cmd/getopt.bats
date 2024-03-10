@@ -20,19 +20,19 @@ debug() {
 }
 
 show_usage() {
-    run mlab.sh $@    
+    run command.sh $@    
     [[ "${status}" -eq 0 ]]
     [[ "${lines[0]}" == "Usage: mlab [OPTIONS] COMMAND"* ]]
 }
 
 show_version() {
-    run mlab.sh $@ 
+    run command.sh $@ 
     [[ "${status}" -eq 0 ]]
     [[ "${lines[0]}" == "Version: "* ]]
 }
 
 invalid_option() {
-    run mlab.sh $@
+    run command.sh $@
     [[ "${status}" -eq 1 ]]
     [[ "${lines[0]}" == "Invalid option: "* ]]
     [[ "${lines[1]}" == "Try 'mlab -h' for more information." ]]
