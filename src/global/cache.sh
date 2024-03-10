@@ -24,7 +24,7 @@ while getopts ':-:' OPTION ; do
          OPTARG=$(echo $OPTION | cut -d'=' -f2)
          OPTION=$(echo $OPTION | cut -d'=' -f1)
          case $OPTION in
-            --path) CACHE_PATH="$OPTARG" ;;
+            --path) CACHE_PATH=$(canonical "$OPTARG") ;;
             --url) CACHE_URL="$OPTARG" ;;
             * ) echo -e "Invalid option: $OPTARG \r\nTry 'mlab cache -h' for more information." && exit 1 ;;
          esac
