@@ -11,8 +11,8 @@ COMMAND_CONF=$(canonical "~/.$COMMAND_NAME")
 
 echo Instalando Home Lab library
 
-echo Set default configuration on path $COMMAND_CONF/config.txt
-mkdir -p $(dirname "$COMMAND_CONF")
+echo Set default configuration on path $COMMAND_CONF/conf.txt
+mkdir -p "$COMMAND_CONF"
 cat <<EOF > $COMMAND_CONF/conf.txt
 URI=$PROJECT_ROOT/src
 LOG_LEVEL=ERROR
