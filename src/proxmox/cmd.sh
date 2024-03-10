@@ -1,31 +1,18 @@
 #!/usr/bin/env bash
-# https://opensource.com/article/20/6/bash-trap
-# https://github.com/lehmannro/assert.sh/blob/master/assert.sh
 
-export LOG_LEVEL=ERROR
-
-FILE_CONF=~/.mlab/conf.txt
-CACHE_FILE=~/.mlab/cache/conf.txt
-
-if [[ ! -e "$FILE_CONF" ]]; then
-    mkdir -p $(dirname "$FILE_CONF")
-    cat <<EOF > $FILE_CONF
-URI=https://raw.githubusercontent.com/marcelobojikian/mlab/main/Proxmox/mlab
-EOF
-fi
+DEFAULT_CONF=~/.mlab/conf.txt
+DEFAULT_CACHE_CONF=~/.mlab/cache/conf.txt
 
 get_config() {
     echo $(cat "$1" | grep "$2" | cut -d'=' -f2)
 }
-
-URI="$(get_config "$FILE_CONF" "URI")"
 
 download() {
 
     local URL=$URI/$1
     local DEST_FILE=$2
     
-    local HTTP_CODE=$(curl --silent --write-out "%{http_code}" --output "$DEST_FILE" "$URL")
+    local HTTP_CODE=$(curl -sSLo "$DEST_FILE" -w "%{http_code}" "$URL")
 
     if [ ${HTTP_CODE} -eq 404 ] ; then
       rm -f "$DEST_FILE"
@@ -37,19 +24,35 @@ download() {
 
 }
 
-configure_cache() {
-  
-  local CACHE_KEY=$1
+path_caching=
+key_caching=global/cache.sh
+cmd_cache() {
 
-  # log debug "load cache configuration"
-  local CMD_CACHE="$(get_config "$CACHE_FILE" "PATH")/$CACHE_KEY"
+  [ ! -f "$DEFAULT_CACHE_CONF" ] && exit 1
 
-  if [ ! -f "$CMD_CACHE" ] ; then
-    # log debug "Download command cache"
-    mkdir -p $(dirname "$CMD_CACHE")
-    download "$CACHE_KEY" "$CMD_CACHE"
-    chmod +x "$CMD_CACHE"
+  CACHE_PATH=$(get_config "$DEFAULT_CACHE_CONF" "PATH")
+  CANONICAL_CACHING=$(eval dirname $CACHE_PATH)/$(basename $CACHE_PATH)
+  path_caching="$CANONICAL_CACHING/global/cache.sh"
+
+  if [ ! -f $path_caching ] ; then
+    
+    mkdir -p $(dirname "$path_caching")
+    download "$key_caching" "$path_caching"
+    chmod +x "$path_caching"
+
   fi
+  
+  local KEY=$1
+
+  cmd_cached=$(path_caching get $KEY 2> /dev/null)
+  if [ $? -ne 0 ] ; then
+    local FILE=$(mktemp -u)
+    download "$KEY" "$FILE"
+    cmd_cached=$($path_caching put "$KEY" "$FILE")
+    chmod +x "$cmd_cached"
+  fi
+
+  echo $cmd_cached
 
 }
 
@@ -60,7 +63,7 @@ run() {
 
   local SOURCE=$(mktemp -u)
 
-  if [ -z "$CACHE_FILE" ] ; then
+  if [ ! -f "$DEFAULT_CACHE_CONF" ] ; then
 
     # log debug "No cache"
     download "$KEY" "$SOURCE"
@@ -68,38 +71,33 @@ run() {
 
   else
 
-    CACHE_KEY=global/cache.sh
-    configure_cache "$CACHE_KEY"
-
-    CMD_CACHE="$(get_config "$CACHE_FILE" "PATH")/$CACHE_KEY"
-
-    result=$($CMD_CACHE get $KEY)
-    if [ $? -ne 0 ] ; then
-      # log debug "Not cached yet"
-      download "$KEY" "$SOURCE"
-      # log debug "Cache key \"$KEY\" on \"$SOURCE\" "
-      $CMD_CACHE put "$KEY" "$SOURCE"
-      chmod +x "$SOURCE"
-    fi
-
-    SOURCE=$result
+    local CMD_KEY=$(cmd_cache $KEY)
+    SOURCE=$CMD_KEY
 
   fi
 
-  # log debug "Running cmd $SOURCE $PARAMS"
   $SOURCE $PARAMS
   
 }
 
 _usage() {
-  echo "Usage: mlab [OPTIONS] COMMAND"
-  # local LANG=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
-  # run "usage/$LANG/${1:-mlab}"
+  local LANG=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
+  run "usage/$LANG/${1:-mlab}"
 }
 
 _version() {
     echo "Version: 1.0"
 }
+
+    # Check default configuration
+    [ ! -f "$DEFAULT_CONF" ] && echo "Default configuration not found on $DEFAULT_CONF" && exit 1
+
+    URI="$(get_config "$DEFAULT_CONF" "URI")"
+    [ -z "$URI" ] && echo "Default URI not found on file $DEFAULT_CONF" && exit 1
+
+    DEFAULT_LOG_LEVEL="$(get_config "$DEFAULT_CONF" "LOG_LEVEL")"
+    export LOG_LEVEL=${DEFAULT_LOG_LEVEL:-"ERROR"}
+
 
 target=mlab
 PARAMETERS=("${@:1}")
@@ -123,7 +121,7 @@ while getopts ':vh-l:' OPTION ; do
             --help) _usage $target && exit 0 ;;
             --version) _version && exit 0 ;;
             --log-level) LOG_LEVEL="$OPTARG" ;;
-            * ) echo -e "Invalid option: $OPTARG \r\nTry 'mlab -h' for more information." && exit 1 ;;
+            * ) [ "$target" == "mlab" ] && echo -e "Invalid option: $OPTARG \r\nTry 'mlab -h' for more information." && exit 1 ;;
          esac
        OPTIND=1
        shift
