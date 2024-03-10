@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
+canonical() {
+  echo $(eval dirname "$1")/$(basename "$1")
+}
+
 PROJECT_ROOT=https://github.com/marcelobojikian/mlab/raw/main
 
 COMMAND_NAME=mlab
-COMMAND_CONF=~/.$COMMAND_NAME
+COMMAND_CONF=$(canonical "~/.$COMMAND_NAME")
 
 echo Instalando Home Lab library
 
 echo Set default configuration on path $COMMAND_CONF/config.txt
+mkdir -p $(dirname "$COMMAND_CONF")
 cat <<EOF > $COMMAND_CONF/conf.txt
 URI=$PROJECT_ROOT/src
 LOG_LEVEL=ERROR
