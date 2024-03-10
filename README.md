@@ -43,7 +43,7 @@ To use this script, make sure the packages are installed.
 
 1. In the terminal,
     ```bash
-    bash -c "$(wget -qLO - https://raw.githubusercontent.com/marcelobojikian/mlab/main/install.sh)"
+    bash -c "$(curl -sSL https://github.com/marcelobojikian/mlab/raw/main/install.sh)"
     ```
 
 ## :memo: Licença
