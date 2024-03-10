@@ -61,22 +61,25 @@ case $target in
   ;;
   "delete")
     if [ -f "$CACHE_FILE_CONF" ]; then
-        PATH_FILE=$(get_config PATH)
-        [ "$PATH_FILE" != "$CACHE_DIR_CONF" ] && rm -r $PATH_FILE        
+        PATH_DIR=$(get_config PATH)
+        CANONICAL_PATH=$(eval dirname $PATH_DIR)/$(basename $PATH_DIR)
+        [ "$CANONICAL_PATH" != "$CACHE_DIR_CONF" ] && rm -r $CANONICAL_PATH        
         rm -r $CACHE_DIR_CONF
     fi
   ;;
   "get")
     request_one_param $@
     PATH_DIR=$(get_config PATH)
-    KEY="$PATH_DIR/$1"
+    CANONICAL_PATH=$(eval dirname $PATH_DIR)/$(basename $PATH_DIR)
+    KEY="$CANONICAL_PATH/$1"
     [ ! -f "$KEY" ] && echo "Cache not found: $KEY" && exit 1
     echo $KEY
   ;;
   "put")
     required_two_param $@
     PATH_DIR=$(get_config PATH)
-    KEY="$PATH_DIR/$1"
+    CANONICAL_PATH=$(eval dirname $PATH_DIR)/$(basename $PATH_DIR)
+    KEY="$CANONICAL_PATH/$1"
     FILE="$2"
     [ ! -f "$FILE" ] && echo "File not found: $KEY" && exit 1
     mkdir -p $(dirname "$KEY")
