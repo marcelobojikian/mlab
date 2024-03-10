@@ -3,6 +3,10 @@
 DEFAULT_CONF=~/.mlab/conf.txt
 DEFAULT_CACHE_CONF=~/.mlab/cache/conf.txt
 
+declare -A targets
+
+targets[cache]=global
+
 get_config() {
     echo $(cat "$1" | grep "$2" | cut -d'=' -f2)
 }
@@ -59,7 +63,7 @@ cmd_cache() {
 run() {
 
   local KEY=$1
-  local PARAMS=$2
+  local PARAMS=${@:2}
 
   local SOURCE=$(mktemp -u)
 
@@ -82,7 +86,7 @@ run() {
 
 _usage() {
   local LANG=$(locale | grep LANGUAGE | cut -d= -f2 | cut -d_ -f1)
-  run "usage/$LANG/${1:-mlab}"
+  run "usage/$LANG/${1:-mlab}" $@
 }
 
 _version() {
@@ -100,10 +104,9 @@ _version() {
 
 
 target=mlab
-PARAMETERS=("${@:1}")
 if [[ ! "$1" =~ ^- && ! "$1" =~ ^-- ]] ; then
   target=$1
-  PARAMETERS=("${@:2}")
+  shift
 fi
 
 [ $# = 0 ] && _usage $target && exit 0
@@ -121,7 +124,7 @@ while getopts ':vh-l:' OPTION ; do
             --help) _usage $target && exit 0 ;;
             --version) _version && exit 0 ;;
             --log-level) LOG_LEVEL="$OPTARG" ;;
-            * ) [ "$target" == "mlab" ] && echo -e "Invalid option: $OPTARG \r\nTry 'mlab -h' for more information." && exit 1 ;;
+            * ) echo -e "Invalid option: $OPTARG \r\nTry 'mlab -h' for more information." && exit 1 ;;
          esac
        OPTIND=1
        shift
@@ -130,4 +133,5 @@ while getopts ':vh-l:' OPTION ; do
     esac
 done
 
-echo run $target $PARAMETERS
+TYPE=${targets[$target]}
+run $TYPE/$target.sh $@
