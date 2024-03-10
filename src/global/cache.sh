@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-CACHE_DIR_CONF=~/.mlab/cache 
+canonical() {
+  echo $(eval dirname "$1")/$(basename "$1")
+}
+
+CACHE_DIR_CONF=$(canonical ~/.mlab/cache)
 CACHE_FILE_CONF=$CACHE_DIR_CONF/conf.txt
 
 CACHE_PATH=$CACHE_DIR_CONF
@@ -32,7 +36,8 @@ while getopts ':-:' OPTION ; do
 done
 
 get_config() {
-    echo $(cat "$CACHE_FILE_CONF" | grep "$1" | cut -d'=' -f2)
+  local path=$(cat "$CACHE_FILE_CONF" | grep "$1" | cut -d'=' -f2)
+  echo $(canonical "$path")
 }
 
 set_config() {
@@ -43,11 +48,11 @@ EOF
 }
 
 request_one_param() {
-    [ -z "$1" ] && echo "One o more paramaters failed." && echo "Try 'mlab cache -h' for more information." && exit 1
+  [ -z "$1" ] && echo "One o more paramaters failed." && echo "Try 'mlab cache -h' for more information." && exit 1
 }
 
 required_two_param() {
-    [ -z "$1" ] || [ -z "$2" ] && echo "One o more paramaters failed." && echo "Try 'mlab cache -h' for more information." && exit 1
+  [ -z "$1" ] || [ -z "$2" ] && echo "One o more paramaters failed." && echo "Try 'mlab cache -h' for more information." && exit 1
 }
 
 case $target in
@@ -62,24 +67,21 @@ case $target in
   "delete")
     if [ -f "$CACHE_FILE_CONF" ]; then
         PATH_DIR=$(get_config PATH)
-        CANONICAL_PATH=$(eval dirname $PATH_DIR)/$(basename $PATH_DIR)
-        [ "$CANONICAL_PATH" != "$CACHE_DIR_CONF" ] && rm -r $CANONICAL_PATH        
+        [ "$PATH_DIR" != "$CACHE_DIR_CONF" ] && rm -r $PATH_DIR        
         rm -r $CACHE_DIR_CONF
     fi
   ;;
   "get")
     request_one_param $@
     PATH_DIR=$(get_config PATH)
-    CANONICAL_PATH=$(eval dirname $PATH_DIR)/$(basename $PATH_DIR)
-    KEY="$CANONICAL_PATH/$1"
+    KEY="$PATH_DIR/$1"
     [ ! -f "$KEY" ] && echo "Cache not found: $KEY" && exit 1
     echo $KEY
   ;;
   "put")
     required_two_param $@
     PATH_DIR=$(get_config PATH)
-    CANONICAL_PATH=$(eval dirname $PATH_DIR)/$(basename $PATH_DIR)
-    KEY="$CANONICAL_PATH/$1"
+    KEY="$PATH_DIR/$1"
     FILE="$2"
     [ ! -f "$FILE" ] && echo "File not found: $KEY" && exit 1
     mkdir -p $(dirname "$KEY")
