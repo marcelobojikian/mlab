@@ -48,7 +48,7 @@ cmd_cache() {
   
   local KEY=$1
 
-  cmd_cached=$(path_caching get $KEY 2> /dev/null)
+  cmd_cached=$($path_caching get $KEY 2> /dev/null)
   if [ $? -ne 0 ] ; then
     local FILE=$(mktemp -u)
     download "$KEY" "$FILE"
