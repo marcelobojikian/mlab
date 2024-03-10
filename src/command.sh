@@ -32,9 +32,9 @@ _functions() {
     source <(curl -sSL "$URI/$FUNCTIONS_KEY")
   else
     if [ ! -f $FUNCTIONS_FILE ] ; then
+      mkdir -p $(dirname "$FUNCTIONS_FILE")
       curl -sSLo "$FUNCTIONS_FILE" "$URI/$FUNCTIONS_KEY"
     fi
-    mkdir -p $(dirname "$FUNCTIONS_FILE")
     source "$FUNCTIONS_FILE"
   fi
 
